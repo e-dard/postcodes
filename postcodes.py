@@ -2,15 +2,41 @@
 import json
 import urllib2
 
-END_POINT = 'http://www.uk-postcodes.com/postcode/'
+END_POINT = 'http://www.uk-postcodes.com/'
 
-def get(postcode):
-    """ requests postcode data from web-service """
-    postcode = postcode.replace(' ', '')
-    url = '%s%s.json' % (END_POINT, postcode)
+def _get_json_resp(url):
     resp = urllib2.urlopen(url)
     return json.loads(resp)
 
+def get(postcode):
+    """ requests postcode data from web-service """
+    postcode = urllib2.quote(postcode.replace(' ', ''))
+    url = '%s/postcode/%s.json' % (END_POINT, postcode)
+    resp = urllib2.urlopen(url)
+    return json.loads(resp)
+
+def get_nearest(lat, lng):
+    """ Return the nearest postcode to the lat-long point provided """
+    url = '%s/latlng/%s,%s.json' % (END_POINT, lat, lng)
+    return _get_json_resp(url)
+
+def _get_from(distance, *dist_params):
+    params = '&'.join([p for p in dist_params])
+    query = '%s&distance=%s&format=%s' % (params, distance, 'json')
+    url = '%s/distance.php?%s' % (END_POINT, query)
+    return _get_json_resp(url)
+
+def get_from_postcode(postcode, distance):
+    """ return all postcodes within `distance` miles of `postcode` """
+    postcode = urllib2.quote(postcode.replace(' ', ''))
+    return _get_from(distance, 'postcode=%s' % postcode)
+
+def get_from_geo(lat, lng, distance):
+    """ 
+    Return all postcodes within `distance` miles of the `lat` `lng` 
+    pair.
+    """
+    return _get_from(distance, 'lat=%s' % lat, 'lng=%s' % lng)
 
 class PostCoder(object):
     """docstring for PostCoder"""
