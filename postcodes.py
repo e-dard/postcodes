@@ -42,7 +42,6 @@ def get_nearest(lat, lng):
     return _get_json_resp(url)
 
 def _get_from(distance, *dist_params):
-
     params = '&'.join([p for p in dist_params])
     query = '%s&distance=%s&format=%s' % (params, distance, 'json')
     url = '%s/distance.php?%s' % (END_POINT, query)
@@ -58,7 +57,7 @@ def get_from_postcode(postcode, distance):
     :param distance: distance in miles to `postcode`.
 
     :returns: a list of dicts containing postcode data within the 
-              specified distance.
+              specified distance or `None` if `postcode` is not valid.
     """
     postcode = urllib2.quote(postcode.replace(' ', ''))
     return _get_from(distance, 'postcode=%s' % postcode)
