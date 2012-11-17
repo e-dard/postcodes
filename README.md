@@ -84,7 +84,10 @@ For example, ``postcodes.get("W1A 2TT")`` returns:
                 u'northing': u''},
       u'postcode': u''}
 
-Values have been removed for brevity; all returned types are `unicode` 
-stings.
+Values have been removed for brevity.
+
+## API Documentation
+
+You'll find more detailed documentation [over here](http://postcodes.readthedocs.org/en/latest/).
 
 © 2012, [Edward Robinson](http://twitter.com/eddrobinson)
