@@ -8,37 +8,74 @@ def _get_json_resp(url):
     try:
         resp = urllib2.urlopen(url)
     except URLError, e:
-        if e.code == 404: # no available data
+        if e.code == 404: # no available data   
             return None
     else:
         return json.loads(resp.read())
 
 def get(postcode):
-    """ requests postcode data from web-service """
+    """
+    Request data associated with `postcode`.
+
+    :param postcode: the postcode to search for. The postcode may 
+                     contain spaces (they will be removed).
+
+    :returns: a dict of the nearest postcode's data or None if no 
+              postcode data is found.
+    """
     postcode = urllib2.quote(postcode.replace(' ', ''))
     url = '%s/postcode/%s.json' % (END_POINT, postcode)
     return _get_json_resp(url)
 
 def get_nearest(lat, lng):
-    """ Return the nearest postcode to the lat-long point provided """
+    """
+    Request the nearest `postcode` to a geographical point, 
+    specified by `lat` and `lng`.
+
+    :param lat: latitude of point.
+
+    :param lng: longitude of point.
+
+    :returns: a dict of the nearest postcode's data.
+    """
     url = '%s/latlng/%s,%s.json' % (END_POINT, lat, lng)
     return _get_json_resp(url)
 
 def _get_from(distance, *dist_params):
+
     params = '&'.join([p for p in dist_params])
     query = '%s&distance=%s&format=%s' % (params, distance, 'json')
     url = '%s/distance.php?%s' % (END_POINT, query)
     return _get_json_resp(url)
 
 def get_from_postcode(postcode, distance):
-    """ return all postcodes within `distance` miles of `postcode` """
+    """
+    Request all postcode data within `distance` miles of `postcode`.
+
+    :param postcode: the postcode to search for. The postcode may 
+                     contain spaces (they will be removed).
+
+    :param distance: distance in miles to `postcode`.
+
+    :returns: a list of dicts containing postcode data within the 
+              specified distance.
+    """
     postcode = urllib2.quote(postcode.replace(' ', ''))
     return _get_from(distance, 'postcode=%s' % postcode)
 
 def get_from_geo(lat, lng, distance):
-    """ 
-    Return all postcodes within `distance` miles of the `lat` `lng` 
-    pair.
+    """
+    Request all postcode data within `distance` miles of a 
+    geographical point specified by `lat` and `lng`.
+
+    :param lat: latitude of point.
+
+    :param lng: longitude of point.
+
+    :param distance: distance in miles to `postcode`.
+
+    :returns: a list of dicts containing postcode data within the 
+              specified distance.
     """
     return _get_from(distance, 'lat=%s' % lat, 'lng=%s' % lng)
 
@@ -95,19 +132,13 @@ class PostCoder(object):
 
     def get(self, postcode, skip_cache=False):
         """
-        Request data associated with `postcode`.
-
-        :param postcode: the postcode to search for. The postcode may 
-                         contain spaces (they will be removed).
+        Calls `postcodes.get` and by default utilises a local cache.
         
         :param skip_cache: optional argument specifying whether to skip 
                            the cache and make an explicit request. 
                            Given postcode data doesn't really change, 
                            it's unlikely you will ever want to set this 
                            to `True`.
-
-        :returns: a dict of the nearest postcode's data or None if no 
-                  postcode data is found.
         """
         # remove spaces and change case here due to caching
         postcode = postcode.lower().replace(' ', '')
@@ -115,12 +146,8 @@ class PostCoder(object):
 
     def get_nearest(self, lat, lng, skip_cache=False): 
         """
-        Request the nearest `postcode` to a geographical point, 
-        specified by `lat` and `lng`.
-
-        :param lat: latitude of point.
-
-        :param lng: longitude of point.
+        Calls `postcodes.get_nearest` but checks correctness of `lat` 
+        and `long`, and by default utilises a local cache.
 
         :param skip_cache: optional argument specifying whether to skip 
                            the cache and make an explicit request.
@@ -136,12 +163,8 @@ class PostCoder(object):
 
     def get_from_postcode(self, postcode, distance, skip_cache=False):
         """
-        Request all postcode data within `distance` miles of `postcode`.
-
-        :param postcode: the postcode to search for. The postcode may 
-                         contain spaces (they will be removed).
-
-        :param distance: distance in miles to `postcode`.
+        Calls `postcodes.get_from_postcode` but checks correctness of 
+        `distance`, and by default utilises a local cache.
 
         :param skip_cache: optional argument specifying whether to skip 
                            the cache and make an explicit request.
@@ -162,14 +185,8 @@ class PostCoder(object):
 
     def get_from_geo(self, lat, lng, distance, skip_cache=False):
         """
-        Request all postcode data within `distance` miles of a 
-        geographical point specified by `lat` and `lng`.
-
-        :param lat: latitude of point.
-
-        :param lng: longitude of point.
-
-        :param distance: distance in miles to `postcode`.
+        Calls `postcodes.get_from_geo` but checks the correctness of 
+        all arguments, and by default utilises a local cache.
 
         :param skip_cache: optional argument specifying whether to skip 
                            the cache and make an explicit request.
