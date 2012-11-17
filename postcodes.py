@@ -51,7 +51,26 @@ class IllegalDistanceException(Exception):
         
 
 class PostCoder(object):
-    """docstring for PostCoder"""
+    """
+    The `PostCoder` object provides state for maintaining a cache of 
+    historical requests. It's the recommended way to interact with the 
+    underlying web-service.
+
+    Because `PostCoder` caches all previously requested postcode data 
+    it's fine to repeatedly request the same data as much as you like, 
+    and you don't need to worry about explicitly storing any data in 
+    your application. 
+
+    Because the underlying data is not likely to change very much, if 
+    at all, cached postcode data never expires. However, if for some 
+    perverse reason you do want to skip the cache and make an explicit 
+    request for data then you can set ``skip_cache=True`` in all of the 
+    available methods. 
+
+    """
+    
+    def __init__(self):
+        self.cache = {}
 
     def _check_point(self, lat, lng):
         """ Checks if latitude and longitude correct """
@@ -70,18 +89,19 @@ class PostCoder(object):
 
     def get(self, postcode, skip_cache=False):
         """
-        Request data for postcode.
+        Request data associated with `postcode`.
 
         :param postcode: the postcode to search for. The postcode may 
-        contain spaces (they will be removed).
-
+                         contain spaces (they will be removed).
+        
         :param skip_cache: optional argument specifying whether to skip 
-        the cache and make an explicit request. Given postcode data 
-        doesn't really change, it's unlikely you will ever want to 
-        set this to True.
+                           the cache and make an explicit request. 
+                           Given postcode data doesn't really change, 
+                           it's unlikely you will ever want to set this 
+                           to `True`.
 
         :returns: a dict of the nearest postcode's data or None if no 
-        postcode data is found.
+                  postcode data is found.
         """
         # remove spaces and change case here due to caching
         postcode = postcode.lower().replace(' ', '')
@@ -89,17 +109,18 @@ class PostCoder(object):
 
     def get_nearest(self, lat, lng, skip_cache=False): 
         """
-        Request the nearest post code to a geographical point.
+        Request the nearest `postcode` to a geographical point, 
+        specified by `lat` and `lng`.
 
         :param lat: latitude of point.
 
         :param lng: longitude of point.
 
         :param skip_cache: optional argument specifying whether to skip 
-        the cache and make an explicit request.
+                           the cache and make an explicit request.
 
-        :raises IllegalPointException: if the latititude or longitude 
-        are out of bounds.
+        :raises IllegalPointException: if the latitude or longitude 
+                                       are out of bounds.
 
         :returns: a dict of the nearest postcode's data.
         """
@@ -112,18 +133,18 @@ class PostCoder(object):
         Request all postcode data within `distance` miles of `postcode`.
 
         :param postcode: the postcode to search for. The postcode may 
-        contain spaces (they will be removed).
+                         contain spaces (they will be removed).
 
         :param distance: distance in miles to `postcode`.
 
         :param skip_cache: optional argument specifying whether to skip 
-        the cache and make an explicit request.
+                           the cache and make an explicit request.
 
-        :raises IllegalPointException: if the latititude or longitude 
-        are out of bounds.
+        :raises IllegalPointException: if the latitude or longitude 
+                                       are out of bounds.
 
         :returns: a list of dicts containing postcode data within the 
-        specified distance.
+                  specified distance.
         """
         distance = float(distance)
         if distance < 0:
@@ -136,7 +157,7 @@ class PostCoder(object):
     def get_from_geo(self, lat, lng, distance, skip_cache=False):
         """
         Request all postcode data within `distance` miles of a 
-        geographical point.
+        geographical point specified by `lat` and `lng`.
 
         :param lat: latitude of point.
 
@@ -145,13 +166,13 @@ class PostCoder(object):
         :param distance: distance in miles to `postcode`.
 
         :param skip_cache: optional argument specifying whether to skip 
-        the cache and make an explicit request.
+                           the cache and make an explicit request.
 
-        :raises IllegalPointException: if the latititude or longitude 
-        are out of bounds.
+        :raises IllegalPointException: if the latitude or longitude 
+                                       are out of bounds.
 
         :returns: a list of dicts containing postcode data within the 
-        specified distance.
+                  specified distance.
         """
         # remove spaces and change case here due to caching
         lat, lng, distance = float(lat), float(lng), float(distance)
@@ -160,7 +181,4 @@ class PostCoder(object):
         self._check_point(lat, lng)
         return self._lookup(skip_cache, get_from_geo, lat, lng, distance)
 
-
-    def __init__(self):
-        self.cache = {}
 
