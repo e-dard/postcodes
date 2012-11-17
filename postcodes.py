@@ -1,11 +1,17 @@
 import json
 import urllib2
+from urllib2 import URLError
 
 END_POINT = 'http://www.uk-postcodes.com'
 
 def _get_json_resp(url):
-    resp = urllib2.urlopen(url)
-    return json.loads(resp.read())
+    try:
+        resp = urllib2.urlopen(url)
+    except URLError, e:
+        if e.code == 404: # no available data
+            return None
+    else:
+        return json.loads(resp.read())
 
 def get(postcode):
     """ requests postcode data from web-service """
@@ -68,7 +74,7 @@ class PostCoder(object):
     available methods. 
 
     """
-    
+
     def __init__(self):
         self.cache = {}
 
