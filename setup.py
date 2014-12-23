@@ -24,6 +24,7 @@ setup(
     platforms='any',
     install_requires=[],
     tests_require=['mock'],
+    test_suite='tests',
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
