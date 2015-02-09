@@ -1,17 +1,23 @@
 import json
-import urllib2
-from urllib2 import URLError
+import sys
+
+if sys.version_info.major < 3:
+    from urllib2 import quote, URLError, urlopen
+else:
+    from urllib.error import URLError
+    from urllib.parse import quote
+    from urllib.request import urlopen
 
 END_POINT = 'http://www.uk-postcodes.com'
 
 def _get_json_resp(url):
     try:
-        resp = urllib2.urlopen(url)
-    except URLError, e:
+        resp = urlopen(url)
+    except URLError as e:
         if e.code == 404: # no available data   
             return None
     else:
-        return json.loads(resp.read())
+        return json.loads(resp.read().decode('utf-8'))
 
 def get(postcode):
     """
@@ -23,7 +29,7 @@ def get(postcode):
     :returns: a dict of the nearest postcode's data or None if no 
               postcode data is found.
     """
-    postcode = urllib2.quote(postcode.replace(' ', ''))
+    postcode = quote(postcode.replace(' ', ''))
     url = '%s/postcode/%s.json' % (END_POINT, postcode)
     return _get_json_resp(url)
 
@@ -59,7 +65,7 @@ def get_from_postcode(postcode, distance):
     :returns: a list of dicts containing postcode data within the 
               specified distance or `None` if `postcode` is not valid.
     """
-    postcode = urllib2.quote(postcode.replace(' ', ''))
+    postcode = quote(postcode.replace(' ', ''))
     return _get_from(distance, 'postcode=%s' % postcode)
 
 def get_from_geo(lat, lng, distance):
